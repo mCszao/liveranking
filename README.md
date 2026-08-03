@@ -118,7 +118,7 @@ npm run dev
    etc — são 7 no total, o workflow já está preparado para lê-los).
 4. O workflow em [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) builda
    o projeto (injetando esses secrets como variáveis de ambiente) e publica
-   automaticamente a cada push na branch `main`.
+   automaticamente a cada push na branch `master`.
 5. Se o repositório tiver um nome diferente de `liveranking`, ajuste a opção `base`
    em [`vite.config.js`](vite.config.js) para `/<nome-do-repo>/` (o valor precisa
    bater exatamente, com a mesma capitalização, com o nome do repositório).
