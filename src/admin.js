@@ -6,6 +6,7 @@ import * as scoresService from './services/scoresService.js'
 import { ICON_NAMES, DEFAULT_ICON } from './icons.js'
 import { cssBackground, iconSvg, iconBadgeHTML, competitionNameHTML } from './ui/badge.js'
 import { showToast } from './ui/toast.js'
+import { emptyStateHTML } from './ui/emptyState.js'
 
 const loginView = document.getElementById('login-view')
 const adminShell = document.getElementById('admin-shell')
@@ -95,6 +96,17 @@ function showManageView() {
 
 // #region Competitions: list
 
+const competitionsEmptyEl = document.getElementById('competitions-empty')
+competitionsEmptyEl.innerHTML = emptyStateHTML({
+  icon: 'trophy',
+  title: 'Nenhuma competição cadastrada ainda. Clique para criar a primeira.',
+  actionable: true,
+})
+competitionsEmptyEl.querySelector('.empty-state-icon').addEventListener('click', () => {
+  resetForm()
+  showCompetitionFormView()
+})
+
 function subscribeCompetitionsList() {
   if (competitionsUnsub) return
   competitionsUnsub = competitionsService.watchCompetitions((data) => {
@@ -118,7 +130,7 @@ function renderCompetitionsList() {
   const empty = document.getElementById('competitions-empty')
   const entries = Object.entries(competitionsData)
 
-  empty.style.display = entries.length ? 'none' : 'block'
+  empty.style.display = entries.length ? 'none' : 'flex'
   container.innerHTML = ''
 
   entries
@@ -395,7 +407,12 @@ function renderTeamsList() {
   const entries = Object.entries(teamsData)
   teamsListEl.innerHTML = ''
   if (!entries.length) {
-    teamsListEl.innerHTML = '<p class="muted">Nenhuma equipe cadastrada.</p>'
+    teamsListEl.innerHTML = `<div class="empty-state">${emptyStateHTML({
+      icon: 'users',
+      title: 'Nenhuma equipe cadastrada ainda. Clique para adicionar a primeira.',
+      actionable: true,
+    })}</div>`
+    teamsListEl.querySelector('.empty-state-icon').addEventListener('click', () => teamNameInput.focus())
     return
   }
   entries
@@ -446,7 +463,12 @@ function renderTestsList() {
   const entries = Object.entries(testsData)
   testsListEl.innerHTML = ''
   if (!entries.length) {
-    testsListEl.innerHTML = '<p class="muted">Nenhuma prova cadastrada.</p>'
+    testsListEl.innerHTML = `<div class="empty-state">${emptyStateHTML({
+      icon: 'flag',
+      title: 'Nenhuma prova cadastrada ainda. Clique para adicionar a primeira.',
+      actionable: true,
+    })}</div>`
+    testsListEl.querySelector('.empty-state-icon').addEventListener('click', () => testNameInput.focus())
     return
   }
   entries

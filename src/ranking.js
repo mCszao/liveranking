@@ -2,6 +2,7 @@ import * as competitionsService from './services/competitionsService.js'
 import * as teamsService from './services/teamsService.js'
 import * as scoresService from './services/scoresService.js'
 import { iconBadgeHTML, iconSvg, cssBackground, competitionNameHTML } from './ui/badge.js'
+import { emptyStateHTML } from './ui/emptyState.js'
 
 const params = new URLSearchParams(location.search)
 const competitionId = params.get('c')
@@ -23,11 +24,12 @@ if (competitionId) {
 function initPicker() {
   const grid = document.getElementById('competition-grid')
   const empty = document.getElementById('picker-empty')
+  empty.innerHTML = emptyStateHTML({ icon: 'trophy', title: 'Nenhuma competição cadastrada ainda.' })
 
   competitionsService.watchCompetitions((data) => {
     const entries = Object.entries(data)
 
-    empty.style.display = entries.length ? 'none' : 'block'
+    empty.style.display = entries.length ? 'none' : 'flex'
     grid.innerHTML = ''
 
     entries
@@ -57,6 +59,11 @@ function initRanking(competitionId) {
   const rankList = document.getElementById('rank-list')
   const emptyState = document.getElementById('empty-state')
   const podium = document.getElementById('podium')
+
+  emptyState.innerHTML = emptyStateHTML({
+    icon: 'users',
+    title: 'Nenhuma equipe cadastrada ainda. Assim que o painel lançar os primeiros pontos, o ranking aparece aqui.',
+  })
 
   let teamsData = {}
   let scoresData = {}
@@ -169,7 +176,7 @@ function initRanking(competitionId) {
   function render() {
     const totals = computeTotals()
 
-    emptyState.style.display = totals.length ? 'none' : 'block'
+    emptyState.style.display = totals.length ? 'none' : 'flex'
     podium.style.display = totals.length ? 'grid' : 'none'
 
     renderPodium(totals.slice(0, 3))
