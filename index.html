@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LiveRanking</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="stylesheet" href="/src/theme.css" />
+</head>
+<body>
+  <div class="container">
+    <div id="picker-view">
+      <div class="site-brand">
+        <span class="rec-dot"></span>
+        <span class="site-brand-text">LiveRanking</span>
+        <span class="site-brand-divider">·</span>
+        <span class="site-brand-page">Escolha a competição</span>
+      </div>
+
+      <div id="picker-empty" class="empty-state" style="display:none;">
+        Nenhuma competição cadastrada ainda.
+      </div>
+
+      <div id="competition-grid"></div>
+    </div>
+
+    <div id="ranking-view" style="display:none;">
+      <div class="top-bar">
+        <div class="site-brand">
+          <span class="rec-dot"></span>
+          <span class="site-brand-text">LiveRanking</span>
+        </div>
+        <a href="./" class="btn btn-ghost btn-sm">← Todas as competições</a>
+      </div>
+
+      <div class="competition-hero">
+        <div class="hero-identity">
+          <div id="ranking-badge" class="icon-badge icon-badge-xl"></div>
+          <div>
+            <div class="hero-title" id="ranking-title">—</div>
+            <div class="hero-subtitle" id="ranking-stage" style="display:none;"></div>
+          </div>
+          <span class="live-pill"><span class="live-dot"></span>Ao vivo</span>
+        </div>
+
+        <div class="hero-content">
+          <section class="podium" id="podium">
+            <div class="podium-place place-2" data-slot="2">
+              <div class="podium-rank-tag">2</div>
+              <div class="podium-medal">🥈</div>
+              <div class="podium-name" data-field="name">—</div>
+              <div class="podium-score" data-field="score">0</div>
+            </div>
+            <div class="podium-place place-1" data-slot="1">
+              <div class="podium-rank-tag">1</div>
+              <div class="podium-medal">🥇</div>
+              <div class="podium-name" data-field="name">—</div>
+              <div class="podium-score" data-field="score">0</div>
+            </div>
+            <div class="podium-place place-3" data-slot="3">
+              <div class="podium-rank-tag">3</div>
+              <div class="podium-medal">🥉</div>
+              <div class="podium-name" data-field="name">—</div>
+              <div class="podium-score" data-field="score">0</div>
+            </div>
+          </section>
+
+          <div id="empty-state" class="empty-state" style="display:none;">
+            Nenhuma equipe cadastrada ainda. Assim que o painel lançar os primeiros pontos, o ranking aparece aqui.
+          </div>
+
+          <div class="rank-list" id="rank-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="site-footer">Powered by <span class="site-footer-brand">mCszao</span></footer>
+  </div>
+
+  <script type="module" src="/src/ranking.js"></script>
+</body>
+</html>
