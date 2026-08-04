@@ -107,6 +107,9 @@ competitionsEmptyEl.querySelector('.empty-state-icon').addEventListener('click',
   showCompetitionFormView()
 })
 
+// Render the empty state first, subscribeCompetitionsList() replaces it once the query resolves.
+renderCompetitionsList()
+
 function subscribeCompetitionsList() {
   if (competitionsUnsub) return
   competitionsUnsub = competitionsService.watchCompetitions((data) => {
@@ -147,7 +150,7 @@ function renderCompetitionsList() {
           <button class="btn btn-danger btn-sm" data-action="remove">Excluir</button>
         </span>
       `
-      row.addEventListener('click', () => enterCompetition(id))
+      row.addEventListener('click', () => enterCompetition(id, competition))
       row.querySelector('[data-action="edit"]').addEventListener('click', (e) => {
         e.stopPropagation()
         populateFormForEdit(id, competition)
@@ -316,10 +319,11 @@ resetForm()
 
 // #region Enter / exit a competition's management view
 
-function enterCompetition(id) {
+function enterCompetition(id, competition) {
   currentCompetitionId = id
   localStorage.setItem('lr_current_competition', id)
   showManageView()
+  if (competition) updateManageHeader(competition)
   subscribeManageData(id)
 }
 
@@ -340,6 +344,17 @@ function updateManageHeader(competition) {
 
 function subscribeManageData(id) {
   unsubscribeManageData()
+
+  // Render the empty state first (also clears any leftover data from a previously
+  // viewed competition), the watchers below replace it once the query resolves.
+  teamsData = {}
+  testsData = {}
+  scoresData = {}
+  renderTeamsList()
+  renderTestsList()
+  renderScoresTable()
+  fillSelect(scoreTeamSelect, teamsData, 'Selecione a equipe')
+  fillSelect(scoreTestSelect, testsData, 'Selecione a prova')
 
   manageUnsubs.push(competitionsService.watchCompetition(id, updateManageHeader))
 

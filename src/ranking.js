@@ -24,7 +24,14 @@ if (competitionId) {
 function initPicker() {
   const grid = document.getElementById('competition-grid')
   const empty = document.getElementById('picker-empty')
-  empty.innerHTML = emptyStateHTML({ icon: 'trophy', title: 'Nenhuma competição cadastrada ainda.' })
+
+  // Render the empty state first, the query below replaces it once it resolves.
+  empty.innerHTML = emptyStateHTML({
+    icon: 'trophy',
+    title: 'Sem competições ativas no momento',
+    subtitle: 'Volte mais tarde para conferir o ranking.',
+  })
+  empty.style.display = 'flex'
 
   competitionsService.watchCompetitions((data) => {
     const entries = Object.entries(data)
@@ -184,6 +191,9 @@ function initRanking(competitionId) {
 
     totals.forEach((entry) => previousScores.set(entry.id, entry.total))
   }
+
+  // Render the empty state first, the queries below replace it once they resolve.
+  render()
 
   competitionsService.watchCompetition(competitionId, (competition) => {
     document.getElementById('ranking-title').textContent = competition?.name || 'Competição'
