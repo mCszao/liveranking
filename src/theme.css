@@ -284,6 +284,49 @@ a { color: var(--red-400); }
   transform: scale(0.94);
 }
 
+.loading-state-icon {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--red-400);
+}
+
+.loading-state-icon::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 3px solid var(--black-600);
+  border-top-color: var(--red-500);
+  animation: spin 0.85s linear infinite;
+}
+
+.loading-state-icon svg {
+  width: 26px;
+  height: 26px;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.empty-state-lg .loading-state-icon {
+  width: 104px;
+  height: 104px;
+}
+
+.empty-state-lg .loading-state-icon svg {
+  width: 40px;
+  height: 40px;
+}
+
 .empty-state-lg {
   min-height: 460px;
 }

@@ -3,6 +3,7 @@ import * as teamsService from './services/teamsService.js'
 import * as scoresService from './services/scoresService.js'
 import { iconBadgeHTML, iconSvg, cssBackground, competitionNameHTML } from './ui/badge.js'
 import { emptyStateHTML } from './ui/emptyState.js'
+import { loadingStateHTML } from './ui/loadingState.js'
 
 const params = new URLSearchParams(location.search)
 const competitionId = params.get('c')
@@ -25,18 +26,23 @@ function initPicker() {
   const grid = document.getElementById('competition-grid')
   const empty = document.getElementById('picker-empty')
 
-  // Render the empty state first, the query below replaces it once it resolves.
-  empty.innerHTML = emptyStateHTML({
-    icon: 'trophy',
-    title: 'Sem competições ativas no momento',
-    subtitle: 'Volte mais tarde para conferir o ranking.',
-  })
+  // Show a loading state first, the query below decides between "empty" and the list.
+  empty.innerHTML = loadingStateHTML({ icon: 'trophy', title: 'Carregando competições...' })
   empty.style.display = 'flex'
 
   competitionsService.watchCompetitions((data) => {
     const entries = Object.entries(data)
 
-    empty.style.display = entries.length ? 'none' : 'flex'
+    if (entries.length) {
+      empty.style.display = 'none'
+    } else {
+      empty.innerHTML = emptyStateHTML({
+        icon: 'trophy',
+        title: 'Sem competições ativas no momento',
+        subtitle: 'Volte mais tarde para conferir o ranking.',
+      })
+      empty.style.display = 'flex'
+    }
     grid.innerHTML = ''
 
     entries
@@ -67,13 +73,9 @@ function initRanking(competitionId) {
   const emptyState = document.getElementById('empty-state')
   const podium = document.getElementById('podium')
 
-  emptyState.innerHTML = emptyStateHTML({
-    icon: 'users',
-    title: 'Nenhuma equipe cadastrada ainda. Assim que o painel lançar os primeiros pontos, o ranking aparece aqui.',
-  })
-
   let teamsData = {}
   let scoresData = {}
+  let teamsLoaded = false
   const previousScores = new Map()
 
   function computeTotals() {
@@ -181,9 +183,25 @@ function initRanking(competitionId) {
   }
 
   function render() {
+    if (!teamsLoaded) {
+      emptyState.innerHTML = loadingStateHTML({ icon: 'users', title: 'Carregando equipes...' })
+      emptyState.style.display = 'flex'
+      podium.style.display = 'none'
+      return
+    }
+
     const totals = computeTotals()
 
-    emptyState.style.display = totals.length ? 'none' : 'flex'
+    if (totals.length) {
+      emptyState.style.display = 'none'
+    } else {
+      emptyState.innerHTML = emptyStateHTML({
+        icon: 'users',
+        title: 'Nenhuma equipe cadastrada ainda.',
+        subtitle: 'Assim que o painel lançar os primeiros pontos, o ranking aparece aqui.',
+      })
+      emptyState.style.display = 'flex'
+    }
     podium.style.display = totals.length ? 'grid' : 'none'
 
     renderPodium(totals.slice(0, 3))
@@ -192,7 +210,7 @@ function initRanking(competitionId) {
     totals.forEach((entry) => previousScores.set(entry.id, entry.total))
   }
 
-  // Render the empty state first, the queries below replace it once they resolve.
+  // Show the loading state first, the queries below decide between "empty" and the list.
   render()
 
   competitionsService.watchCompetition(competitionId, (competition) => {
@@ -207,6 +225,7 @@ function initRanking(competitionId) {
 
   teamsService.watchTeams(competitionId, (data) => {
     teamsData = data
+    teamsLoaded = true
     render()
   })
 

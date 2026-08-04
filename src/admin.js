@@ -7,6 +7,7 @@ import { ICON_NAMES, DEFAULT_ICON } from './icons.js'
 import { cssBackground, iconSvg, iconBadgeHTML, competitionNameHTML } from './ui/badge.js'
 import { showToast } from './ui/toast.js'
 import { emptyStateHTML } from './ui/emptyState.js'
+import { loadingStateHTML } from './ui/loadingState.js'
 
 const loginView = document.getElementById('login-view')
 const adminShell = document.getElementById('admin-shell')
@@ -21,6 +22,10 @@ let competitionsData = {}
 let teamsData = {}
 let testsData = {}
 let scoresData = {}
+
+let competitionsLoaded = false
+let teamsLoaded = false
+let testsLoaded = false
 
 let currentCompetitionId = localStorage.getItem('lr_current_competition') || null
 let editingCompetitionId = null
@@ -96,24 +101,14 @@ function showManageView() {
 
 // #region Competitions: list
 
-const competitionsEmptyEl = document.getElementById('competitions-empty')
-competitionsEmptyEl.innerHTML = emptyStateHTML({
-  icon: 'trophy',
-  title: 'Nenhuma competição cadastrada ainda. Clique para criar a primeira.',
-  actionable: true,
-})
-competitionsEmptyEl.querySelector('.empty-state-icon').addEventListener('click', () => {
-  resetForm()
-  showCompetitionFormView()
-})
-
-// Render the empty state first, subscribeCompetitionsList() replaces it once the query resolves.
+// Show the loading state first, subscribeCompetitionsList() decides between "empty" and the list.
 renderCompetitionsList()
 
 function subscribeCompetitionsList() {
   if (competitionsUnsub) return
   competitionsUnsub = competitionsService.watchCompetitions((data) => {
     competitionsData = data
+    competitionsLoaded = true
     renderCompetitionsList()
     if (currentCompetitionId && !competitionsData[currentCompetitionId]) {
       exitCompetition()
@@ -131,9 +126,30 @@ function unsubscribeCompetitionsList() {
 function renderCompetitionsList() {
   const container = document.getElementById('competitions-list')
   const empty = document.getElementById('competitions-empty')
+
+  if (!competitionsLoaded) {
+    empty.innerHTML = loadingStateHTML({ icon: 'trophy', title: 'Carregando competições...' })
+    empty.style.display = 'flex'
+    container.innerHTML = ''
+    return
+  }
+
   const entries = Object.entries(competitionsData)
 
-  empty.style.display = entries.length ? 'none' : 'flex'
+  if (entries.length) {
+    empty.style.display = 'none'
+  } else {
+    empty.innerHTML = emptyStateHTML({
+      icon: 'trophy',
+      title: 'Nenhuma competição cadastrada ainda. Clique para criar a primeira.',
+      actionable: true,
+    })
+    empty.querySelector('.empty-state-icon').addEventListener('click', () => {
+      resetForm()
+      showCompetitionFormView()
+    })
+    empty.style.display = 'flex'
+  }
   container.innerHTML = ''
 
   entries
@@ -345,11 +361,13 @@ function updateManageHeader(competition) {
 function subscribeManageData(id) {
   unsubscribeManageData()
 
-  // Render the empty state first (also clears any leftover data from a previously
-  // viewed competition), the watchers below replace it once the query resolves.
+  // Show the loading state first (also clears any leftover data from a previously
+  // viewed competition), the watchers below decide between "empty" and the list.
   teamsData = {}
   testsData = {}
   scoresData = {}
+  teamsLoaded = false
+  testsLoaded = false
   renderTeamsList()
   renderTestsList()
   renderScoresTable()
@@ -361,6 +379,7 @@ function subscribeManageData(id) {
   manageUnsubs.push(
     teamsService.watchTeams(id, (data) => {
       teamsData = data
+      teamsLoaded = true
       renderTeamsList()
       fillSelect(scoreTeamSelect, teamsData, 'Selecione a equipe')
       renderScoresTable()
@@ -370,6 +389,7 @@ function subscribeManageData(id) {
   manageUnsubs.push(
     testsService.watchTests(id, (data) => {
       testsData = data
+      testsLoaded = true
       renderTestsList()
       fillSelect(scoreTestSelect, testsData, 'Selecione a prova')
       renderScoresTable()
@@ -419,8 +439,14 @@ teamAddBtn.addEventListener('click', async () => {
 })
 
 function renderTeamsList() {
-  const entries = Object.entries(teamsData)
   teamsListEl.innerHTML = ''
+
+  if (!teamsLoaded) {
+    teamsListEl.innerHTML = `<div class="empty-state">${loadingStateHTML({ icon: 'users', title: 'Carregando equipes...' })}</div>`
+    return
+  }
+
+  const entries = Object.entries(teamsData)
   if (!entries.length) {
     teamsListEl.innerHTML = `<div class="empty-state">${emptyStateHTML({
       icon: 'users',
@@ -475,8 +501,14 @@ testAddBtn.addEventListener('click', async () => {
 })
 
 function renderTestsList() {
-  const entries = Object.entries(testsData)
   testsListEl.innerHTML = ''
+
+  if (!testsLoaded) {
+    testsListEl.innerHTML = `<div class="empty-state">${loadingStateHTML({ icon: 'flag', title: 'Carregando provas...' })}</div>`
+    return
+  }
+
+  const entries = Object.entries(testsData)
   if (!entries.length) {
     testsListEl.innerHTML = `<div class="empty-state">${emptyStateHTML({
       icon: 'flag',
@@ -562,6 +594,13 @@ scoreTestSelect.addEventListener('change', renderScoresTable)
 function renderScoresTable() {
   const testId = scoreTestSelect.value
   const scoresContext = document.getElementById('scores-context')
+
+  if (!teamsLoaded) {
+    scoresContext.textContent = ''
+    scoresTbody.innerHTML = '<tr><td colspan="3" class="muted">Carregando equipes...</td></tr>'
+    return
+  }
+
   scoresContext.textContent = testId
     ? `Mostrando os pontos em: ${testsData[testId]?.name || 'prova selecionada'}.`
     : 'Mostrando o total geral de cada equipe. Selecione uma prova acima para lançar e ver os pontos dela.'
