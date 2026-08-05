@@ -8,6 +8,8 @@ import { cssBackground, iconSvg, iconBadgeHTML, competitionNameHTML } from './ui
 import { showToast } from './ui/toast.js'
 import { emptyStateHTML } from './ui/emptyState.js'
 import { loadingStateHTML } from './ui/loadingState.js'
+import eyeIcon from 'lucide-static/icons/eye.svg?raw'
+import eyeOffIcon from 'lucide-static/icons/eye-off.svg?raw'
 
 const loginView = document.getElementById('login-view')
 const adminShell = document.getElementById('admin-shell')
@@ -70,6 +72,18 @@ loginForm.addEventListener('submit', async (e) => {
   } catch (err) {
     loginError.textContent = 'Não foi possível entrar. Confira email e senha.'
   }
+})
+
+const loginPasswordInput = document.getElementById('login-password')
+const togglePasswordBtn = document.getElementById('toggle-password')
+togglePasswordBtn.innerHTML = eyeIcon
+
+togglePasswordBtn.addEventListener('click', () => {
+  const isVisible = loginPasswordInput.type === 'text'
+  loginPasswordInput.type = isVisible ? 'password' : 'text'
+  togglePasswordBtn.innerHTML = isVisible ? eyeIcon : eyeOffIcon
+  togglePasswordBtn.setAttribute('aria-pressed', String(!isVisible))
+  togglePasswordBtn.setAttribute('aria-label', isVisible ? 'Mostrar senha' : 'Ocultar senha')
 })
 
 document.getElementById('logout-btn-1').addEventListener('click', () => authService.logout())
