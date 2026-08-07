@@ -83,7 +83,13 @@ function initRanking(competitionId) {
       .map(([id, team]) => {
         const teamScores = scoresData[id] || {}
         const total = Object.values(teamScores).reduce((sum, v) => sum + (Number(v) || 0), 0)
-        return { id, name: team?.name || '(sem nome)', total }
+        return {
+          id,
+          name: team?.name || '(sem nome)',
+          total,
+          disqualified: !!team?.disqualified,
+          disqualifiedReason: team?.disqualifiedReason || '',
+        }
       })
       .sort((a, b) => b.total - a.total || a.name.localeCompare(b.name))
   }
@@ -182,6 +188,34 @@ function initRanking(competitionId) {
     })
   }
 
+  function renderDisqualifiedSection(list) {
+    const section = document.getElementById('disqualified-section')
+    const container = document.getElementById('disqualified-list')
+
+    if (!list.length) {
+      section.style.display = 'none'
+      return
+    }
+
+    section.style.display = 'block'
+    container.innerHTML = ''
+    list.forEach((entry) => {
+      const row = document.createElement('div')
+      row.className = 'dq-item'
+      row.innerHTML = `
+        <div class="dq-item-top">
+          <span class="dq-item-name-group">
+            <span class="dq-item-name">${entry.name}</span>
+            <span class="dq-badge">Desclassificada</span>
+          </span>
+          <span class="dq-item-score">${entry.total}</span>
+        </div>
+        ${entry.disqualifiedReason ? `<div class="dq-item-reason">Motivo: ${entry.disqualifiedReason}</div>` : ''}
+      `
+      container.appendChild(row)
+    })
+  }
+
   function render() {
     if (!teamsLoaded) {
       emptyState.innerHTML = loadingStateHTML({ icon: 'users', title: 'Carregando equipes...' })
@@ -191,6 +225,8 @@ function initRanking(competitionId) {
     }
 
     const totals = computeTotals()
+    const qualified = totals.filter((entry) => !entry.disqualified)
+    const disqualified = totals.filter((entry) => entry.disqualified)
 
     if (totals.length) {
       emptyState.style.display = 'none'
@@ -202,10 +238,11 @@ function initRanking(competitionId) {
       })
       emptyState.style.display = 'flex'
     }
-    podium.style.display = totals.length ? 'grid' : 'none'
+    podium.style.display = qualified.length ? 'grid' : 'none'
 
-    renderPodium(totals.slice(0, 3))
-    renderList(totals.slice(3))
+    renderPodium(qualified.slice(0, 3))
+    renderList(qualified.slice(3))
+    renderDisqualifiedSection(disqualified)
 
     totals.forEach((entry) => previousScores.set(entry.id, entry.total))
   }

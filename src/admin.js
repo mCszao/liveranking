@@ -476,9 +476,18 @@ function renderTeamsList() {
       const row = document.createElement('div')
       row.className = 'list-row'
       row.innerHTML = `
-        <span>${team.name}</span>
+        <div class="list-row-info">
+          <span class="list-row-name${team.disqualified ? ' disqualified' : ''}">${team.name}</span>
+          ${team.disqualified ? '<span class="dq-badge">Desclassificada</span>' : ''}
+          ${team.disqualified && team.disqualifiedReason ? `<div class="list-row-reason">Motivo: ${team.disqualifiedReason}</div>` : ''}
+        </div>
         <span class="list-row-actions">
           <button class="btn btn-ghost btn-sm" data-action="rename">Renomear</button>
+          ${
+            team.disqualified
+              ? '<button class="btn btn-primary btn-sm" data-action="requalify">Requalificar</button>'
+              : '<button class="btn btn-ghost btn-sm" data-action="disqualify">Desclassificar</button>'
+          }
           <button class="btn btn-danger btn-sm" data-action="remove">Remover</button>
         </span>
       `
@@ -494,6 +503,25 @@ function renderTeamsList() {
         await teamsService.removeTeam(currentCompetitionId, id)
         toast('Equipe removida.')
       })
+      if (team.disqualified) {
+        row.querySelector('[data-action="requalify"]').addEventListener('click', async () => {
+          if (!window.confirm(`Reverter a desclassificação de "${team.name}"?`)) return
+          await teamsService.requalifyTeam(currentCompetitionId, id)
+          toast('Equipe reabilitada.')
+        })
+      } else {
+        row.querySelector('[data-action="disqualify"]').addEventListener('click', async () => {
+          const reason = window.prompt(`Motivo da desclassificação de "${team.name}":`)
+          if (reason === null) return
+          const trimmedReason = reason.trim()
+          if (!trimmedReason) {
+            toast('Informe o motivo da desclassificação.', true)
+            return
+          }
+          await teamsService.disqualifyTeam(currentCompetitionId, id, trimmedReason)
+          toast('Equipe desclassificada.')
+        })
+      }
       teamsListEl.appendChild(row)
     })
 }

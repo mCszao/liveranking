@@ -21,6 +21,8 @@ equipes disputando pontos em provas/etapas.
 - Lançamento de pontos é **cumulativo** (soma ao total já existente da equipe
   naquela prova) e a listagem mostra todas as equipes cadastradas, mesmo com 0
   pontos.
+- Desclassificação de equipe com motivo obrigatório: some do pódio/ranking e
+  aparece numa seção separada na tela pública, com o motivo visível.
 - 100% estático no frontend — sem servidor próprio para manter. Hospedagem pensada
   para o GitHub Pages.
 
@@ -87,7 +89,12 @@ competitions/{competitionId}
   iconBg       -> { mode: "solid" | "gradient", color1, color2, angle }
   createdAt    -> timestamp
 
-competitions/{competitionId}/teams/{teamId}           -> { name, createdAt }
+competitions/{competitionId}/teams/{teamId}
+  name                -> string
+  createdAt           -> timestamp
+  disqualified        -> boolean (opcional, presente só quando desclassificada)
+  disqualifiedReason  -> string (opcional, motivo informado na desclassificação)
+
 competitions/{competitionId}/tests/{testId}           -> { name, createdAt }
 competitions/{competitionId}/scores/{teamId}/{testId} -> number
 ```
@@ -241,6 +248,12 @@ npm run dev
    competição selecionada.
 5. Competições, equipes e provas podem ser renomeadas/editadas ou excluídas a
    qualquer momento.
+6. Para desclassificar uma equipe, use o botão **Desclassificar** na aba
+   **Equipes** e informe o motivo (obrigatório). A equipe some do pódio e da
+   lista de posições na tela pública, e passa a aparecer numa seção separada
+   **Equipes desclassificadas**, com nome riscado, selo **Desclassificada** e o
+   motivo visível. O botão vira **Requalificar** para reverter a qualquer
+   momento.
 
 ## Solução de problemas comuns
 

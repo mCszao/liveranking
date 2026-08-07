@@ -233,6 +233,62 @@ a { color: var(--red-400); }
   text-align: right;
 }
 
+.disqualified-heading {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--white-faint);
+  margin: 32px 0 12px;
+}
+
+.dq-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--black-800);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  margin-bottom: 10px;
+  opacity: 0.8;
+}
+
+.dq-item-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.dq-item-name-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.dq-item-name {
+  font-weight: 600;
+  text-decoration: line-through;
+  color: var(--white-faint);
+}
+
+.dq-item-score {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--white-faint);
+  flex-shrink: 0;
+}
+
+.dq-item-reason {
+  font-size: 12px;
+  color: var(--white-faint);
+  font-style: italic;
+}
+
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -553,7 +609,45 @@ a { color: var(--red-400); }
   margin-bottom: 8px;
 }
 
-.list-row-actions { display: flex; gap: 6px; }
+.list-row-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+.list-row-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.list-row-name {
+  font-weight: 600;
+}
+
+.list-row-name.disqualified {
+  text-decoration: line-through;
+  color: var(--white-faint);
+}
+
+.list-row-reason {
+  font-size: 12px;
+  color: var(--white-faint);
+  font-style: italic;
+}
+
+.dq-badge {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
 
 table.data-table {
   width: 100%;
